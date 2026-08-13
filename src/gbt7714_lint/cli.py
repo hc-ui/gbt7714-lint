@@ -26,6 +26,13 @@ def _read_input(path_arg: str) -> tuple[str, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Chinese rule messages must not crash on non-UTF8 consoles (e.g. cp437)
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, OSError):
+            pass
+
     parser = argparse.ArgumentParser(
         prog="gbt7714-lint",
         description="检查参考文献列表是否符合 GB/T 7714—2025《信息与文献 参考文献著录规则》，并可自动修复常见问题。",

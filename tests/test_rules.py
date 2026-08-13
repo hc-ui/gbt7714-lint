@@ -5,8 +5,10 @@ from gbt7714_lint.rules import (
     check_cited_date,
     check_date_format,
     check_et_al_role,
+    check_etal_language,
     check_missing_type,
     check_numbering,
+    check_space_before_type,
     check_surname_case,
     check_trailing_period,
     check_unknown_type,
@@ -14,7 +16,9 @@ from gbt7714_lint.rules import (
     fix_cited_date,
     fix_date_format,
     fix_et_al_role,
+    fix_etal_language,
     fix_fullwidth_punct,
+    fix_space_before_type,
     fix_surname_case,
     fix_type_case,
 )
@@ -157,12 +161,69 @@ def test_chinese_date_normalized():
     assert "[2024-05-06]" in fix_date_format(body)
 
 
+# W106: bracket kinds are preserved -------------------------------------
+
+def test_paren_update_date_stays_parenthesised():
+    body = "王芳. 某报告[EB/OL]. （2024.5.6）[2024.6.1]. https://example.com."
+    fixed = fix_date_format(body)
+    assert "(2024-05-06)" in fixed
+    assert "[2024-06-01]" in fixed
+
+
+def test_paren_date_not_removed_as_cited_date():
+    # print resource with a parenthesised publish date: W103 must not fire
+    body = "李强. 某图书[M]. 北京: 出版社, (2019-01-01)."
+    assert check_cited_date(entry(body)) == []
+    assert "(2019-01-01)" in fix_cited_date(body)
+
+
+# W110 -----------------------------------------------------------------
+
+def test_chinese_entry_with_et_al():
+    body = "张三,李四,王五,et al. 某研究[J]. 某学报, 2020, 12(3): 45-50."
+    issues = check_etal_language(entry(body))
+    assert issues and issues[0].fixable
+    assert fix_etal_language(body).startswith("张三,李四,王五,等.")
+
+
+def test_english_entry_with_deng():
+    body = "Smith J, Brown K, Lee M, 等. Title[J]. Journal, 2021, 2(3): 1-9."
+    issues = check_etal_language(entry(body))
+    assert issues and issues[0].fixable
+    assert fix_etal_language(body).startswith("Smith J, Brown K, Lee M, et al.")
+
+
+def test_matching_language_untouched():
+    assert check_etal_language(entry("张三,李四,王五,等. 某研究[J]. 学报, 2020.")) == []
+    assert check_etal_language(entry("Smith J, et al. Title[J]. Journal, 2021.")) == []
+
+
+# W111 -----------------------------------------------------------------
+
+def test_space_before_type_marker():
+    body = "张三. 某研究 [J]. 某学报, 2020, 12(3): 45-50."
+    issues = check_space_before_type(entry(body))
+    assert issues and issues[0].fixable
+    assert "某研究[J]." in fix_space_before_type(body)
+
+
+def test_space_before_date_bracket_untouched():
+    body = "王芳. 某报告[EB/OL]. [2026-08-01]. https://example.com."
+    assert check_space_before_type(entry(body)) == []
+
+
 # W107 -----------------------------------------------------------------
 
 def test_fullwidth_author_comma():
     body = "张三，李四. 某研究[J]. 某学报, 2020, 12(3): 45-50."
     fixed = fix_fullwidth_punct(body)
     assert fixed.startswith("张三,李四.")
+
+
+def test_english_authors_get_spaced_comma():
+    body = "Smith J，Brown K. Title[J]. Journal, 2021, 2(3): 1-9."
+    fixed = fix_fullwidth_punct(body)
+    assert fixed.startswith("Smith J, Brown K.")
 
 
 def test_trailing_chinese_period():

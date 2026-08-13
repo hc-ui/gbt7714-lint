@@ -12,8 +12,9 @@ from typing import Callable, Optional
 
 from .models import Entry, Issue
 from .parser import (
-    DATE_BRACKET_RE,
     DOI_RE,
+    PAREN_DATE_RE,
+    SQUARE_DATE_RE,
     TYPE_RE,
     URL_RE,
     VALID_CARRIERS,
@@ -224,13 +225,15 @@ def _is_online(body: str) -> bool:
 
 
 def check_cited_date(entry: Entry) -> list[Issue]:
-    has_date = bool(DATE_BRACKET_RE.search(entry.body))
+    """Only square-bracket dates are cited dates; parenthesised dates are
+    publish/update dates and belong to a different rule set."""
+    has_cited = bool(SQUARE_DATE_RE.search(entry.body))
     m = find_type_marker(entry.body)
     if not m:
         return []
     online = _is_online(entry.body)
-    if not online and has_date:
-        d = DATE_BRACKET_RE.search(entry.body)
+    if not online and has_cited:
+        d = SQUARE_DATE_RE.search(entry.body)
         return [
             _issue(
                 entry,
@@ -242,7 +245,7 @@ def check_cited_date(entry: Entry) -> list[Issue]:
                 after="",
             )
         ]
-    if online and not has_date:
+    if online and not has_cited:
         return [
             _issue(
                 entry,
@@ -257,7 +260,7 @@ def check_cited_date(entry: Entry) -> list[Issue]:
 def fix_cited_date(body: str) -> str:
     if _is_online(body) or find_type_marker(body) is None:
         return body
-    body = DATE_BRACKET_RE.sub("", body)
+    body = SQUARE_DATE_RE.sub("", body)
     body = re.sub(r"\s+([.。．,，;；])", r"\1", body)
     return body
 
@@ -320,34 +323,48 @@ def _normalize_date(date_str: str) -> Optional[str]:
 
 def check_date_format(entry: Entry) -> list[Issue]:
     issues = []
-    for m in DATE_BRACKET_RE.finditer(entry.body):
-        normalized = _normalize_date(m.group("date"))
-        if normalized and m.group(0) != f"[{normalized}]":
-            issues.append(
-                _issue(
-                    entry,
-                    "W106",
-                    "warning",
-                    "日期应采用 GB/T 7408 格式 YYYY-MM-DD 并置于半角方括号内",
-                    fixable=True,
-                    before=m.group(0),
-                    after=f"[{normalized}]",
+    for regex, open_ch, close_ch, kind in (
+        (SQUARE_DATE_RE, "[", "]", "引用日期"),
+        (PAREN_DATE_RE, "(", ")", "更新/发布日期"),
+    ):
+        for m in regex.finditer(entry.body):
+            normalized = _normalize_date(m.group("date"))
+            expected = f"{open_ch}{normalized}{close_ch}"
+            if normalized and m.group(0) != expected:
+                issues.append(
+                    _issue(
+                        entry,
+                        "W106",
+                        "warning",
+                        f"{kind}应采用 GB/T 7408 格式 YYYY-MM-DD 并使用半角括号",
+                        fixable=True,
+                        before=m.group(0),
+                        after=expected,
+                    )
                 )
-            )
     return issues
 
 
 def fix_date_format(body: str) -> str:
-    def repl(m: re.Match) -> str:
-        normalized = _normalize_date(m.group("date"))
-        return f"[{normalized}]" if normalized else m.group(0)
+    def make_repl(open_ch: str, close_ch: str):
+        def repl(m: re.Match) -> str:
+            normalized = _normalize_date(m.group("date"))
+            return f"{open_ch}{normalized}{close_ch}" if normalized else m.group(0)
 
-    return DATE_BRACKET_RE.sub(repl, body)
+        return repl
+
+    body = SQUARE_DATE_RE.sub(make_repl("[", "]"), body)
+    body = PAREN_DATE_RE.sub(make_repl("(", ")"), body)
+    return body
 
 
 # ---------------------------------------------------------------------------
 # W107: bibliographic separators must be half-width
 # ---------------------------------------------------------------------------
+
+def _author_separator(seg: str) -> str:
+    return "," if _CJK_RE.search(seg) else ", "
+
 
 def check_fullwidth_punct(entry: Entry) -> list[Issue]:
     issues = []
@@ -361,7 +378,7 @@ def check_fullwidth_punct(entry: Entry) -> list[Issue]:
                 "著者之间的分隔符应使用半角逗号“,”而非全角“，”",
                 fixable=True,
                 before=seg,
-                after=re.sub(r"\s*[，；]\s*", ",", seg),
+                after=re.sub(r"\s*[，；]\s*", _author_separator(seg), seg),
             )
         )
     if re.search(r"[．]", entry.body):
@@ -402,7 +419,7 @@ def check_fullwidth_punct(entry: Entry) -> list[Issue]:
 def fix_fullwidth_punct(body: str) -> str:
     seg = authors_segment(body)
     if seg:
-        fixed_seg = re.sub(r"\s*[，；]\s*", ",", seg)
+        fixed_seg = re.sub(r"\s*[，；]\s*", _author_separator(seg), seg)
         body = fixed_seg + body[len(seg):]
     # Full-width period used as a bibliographic separator (protect URLs)
     parts = URL_RE.split(body)
@@ -416,6 +433,91 @@ def fix_fullwidth_punct(body: str) -> str:
     if body.rstrip().endswith("。"):
         body = body.rstrip()[:-1] + "."
     return body
+
+
+# ---------------------------------------------------------------------------
+# W110: 等 / et al. must match the entry language
+# ---------------------------------------------------------------------------
+
+_ET_AL_WORD_RE = re.compile(r"et\s+al\.?", re.IGNORECASE)
+
+
+def _seg_language_cjk(seg: str) -> bool:
+    """Judge segment language by the author names themselves."""
+    names_only = seg.replace("等", "")
+    return bool(_CJK_RE.search(names_only))
+
+
+def check_etal_language(entry: Entry) -> list[Issue]:
+    seg = authors_segment(entry.body)
+    if not seg:
+        return []
+    if _seg_language_cjk(seg) and _ET_AL_WORD_RE.search(seg):
+        return [
+            _issue(
+                entry,
+                "W110",
+                "warning",
+                "中文文献的著者省略应使用“等”而非“et al.”",
+                fixable=True,
+                before=seg,
+                after=_ET_AL_WORD_RE.sub("等", seg),
+            )
+        ]
+    if not _seg_language_cjk(seg) and "等" in seg:
+        return [
+            _issue(
+                entry,
+                "W110",
+                "warning",
+                "外文文献的著者省略应使用“et al.”而非“等”",
+                fixable=True,
+                before=seg,
+                after=re.sub(r",?\s*等", ", et al", seg),
+            )
+        ]
+    return []
+
+
+def fix_etal_language(body: str) -> str:
+    seg = authors_segment(body)
+    if not seg:
+        return body
+    if _seg_language_cjk(seg) and _ET_AL_WORD_RE.search(seg):
+        fixed = _ET_AL_WORD_RE.sub("等", seg)
+        fixed = re.sub(r",\s*等", ",等", fixed)
+        return fixed + body[len(seg):]
+    if not _seg_language_cjk(seg) and "等" in seg:
+        fixed = re.sub(r",?\s*等", ", et al", seg)
+        return fixed + body[len(seg):]
+    return body
+
+
+# ---------------------------------------------------------------------------
+# W111: no space before the document type marker
+# ---------------------------------------------------------------------------
+
+_SPACE_BEFORE_TYPE_RE = re.compile(
+    r"[ \t\u3000]+(?=[\[［]\s*[A-Za-z]{1,2}\s*(?:/\s*[A-Za-z]{2})?\s*[\]］])"
+)
+
+
+def check_space_before_type(entry: Entry) -> list[Issue]:
+    if _SPACE_BEFORE_TYPE_RE.search(entry.body):
+        return [
+            _issue(
+                entry,
+                "W111",
+                "warning",
+                "文献类型标识应紧跟题名，之间不应有空格（如“标题 [J]”应为“标题[J]”）",
+                fixable=True,
+            )
+        ]
+    return []
+
+
+def fix_space_before_type(body: str) -> str:
+    return _SPACE_BEFORE_TYPE_RE.sub("", body)
 
 
 # ---------------------------------------------------------------------------
@@ -498,16 +600,20 @@ ENTRY_CHECKS: list[Callable[[Entry], list[Issue]]] = [
     check_author_count,
     check_date_format,
     check_fullwidth_punct,
+    check_etal_language,
+    check_space_before_type,
     check_trailing_period,
 ]
 
 # Applied in order; punctuation first so later rules see normalized text
 ENTRY_FIXES: list[Callable[[str], str]] = [
     fix_fullwidth_punct,
+    fix_space_before_type,
     fix_type_case,
     fix_surname_case,
     fix_et_al_role,
     fix_author_count,
+    fix_etal_language,
     fix_date_format,
     fix_cited_date,
     fix_trailing_period,

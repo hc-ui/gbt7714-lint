@@ -22,10 +22,14 @@ _LABEL_RE = re.compile(
 # Document type / carrier marker, e.g. [J], [EB/OL], [M/OL]
 TYPE_RE = re.compile(r"[\[［]\s*(?P<type>[A-Za-z]{1,2})\s*(?:/\s*(?P<carrier>[A-Za-z]{2}))?\s*[\]］]")
 
-# A cited/updated date bracket, e.g. [2024-05-06] or [2024.5.6] or （2024-05-06）
-DATE_BRACKET_RE = re.compile(
-    r"[\[［(（]\s*(?P<date>\d{4}\s*[-–—./年]\s*\d{1,2}\s*[-–—./月]\s*\d{1,2}\s*日?)\s*[\]］)）]"
-)
+# GB/T 7714 distinguishes two dated marks: "(update/publish date)" in
+# parentheses and "[cited date]" in square brackets. Keep them separate so
+# fixes never turn one into the other.
+_DATE_INNER = r"\d{4}\s*[-–—./年]\s*\d{1,2}\s*[-–—./月]\s*\d{1,2}\s*日?"
+SQUARE_DATE_RE = re.compile(rf"[\[［]\s*(?P<date>{_DATE_INNER})\s*[\]］]")
+PAREN_DATE_RE = re.compile(rf"[(（]\s*(?P<date>{_DATE_INNER})\s*[)）]")
+# Matches either kind (read-only helpers)
+DATE_BRACKET_RE = re.compile(rf"[\[［(（]\s*(?P<date>{_DATE_INNER})\s*[\]］)）]")
 
 URL_RE = re.compile(r"https?://\S+|www\.\S+", re.IGNORECASE)
 DOI_RE = re.compile(r"\bDOI\s*[:：]\s*\S+|\bdoi\.org/\S+", re.IGNORECASE)
