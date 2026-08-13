@@ -11,6 +11,8 @@
 
 A linter and auto-fixer for plain-text bibliographies under **GB/T 7714—2025**, the new Chinese national standard for bibliographic references that took effect on **July 1, 2026**, replacing GB/T 7714—2015. Paste the reference list from your thesis, get a rule-by-rule report, and let `--fix` migrate the mechanical parts automatically. Zero dependencies, works offline. [Try it in your browser](https://hc-ui.github.io/gbt7714-lint/) — no install needed.
 
+![在线 Demo：逐条指出格式问题并给出修复对照](assets/demo-screenshot.png)
+
 ## 为什么需要它
 
 GB/T 7714—2025 已于 2026 年 7 月 1 日实施，高校学位论文和期刊投稿都在陆续切换新国标。但你手里的参考文献往往是 Word 里的一段**纯文本**——BibTeX 转换器、LaTeX 宏包、Zotero CSL 样式都帮不上忙。
