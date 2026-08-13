@@ -1,0 +1,7 @@
+[1] EINSTEIN A. Relativity: the special and the general theory[M]. New York: Crown, 1961.
+[2] 张三，李四，王五，赵六. 深度学习在图像识别中的应用研究[J]. 计算机学报，2020, 43(3): 45-58。
+[3] 皮亚杰. 结构主义[M]. 倪连生, 王琳, 等译. 北京: 商务印书馆, 1984.
+[4] 李强. 数据库系统概论[M]. 北京: 高等教育出版社, 2019[2024-05-06].
+[5] 王芳. 人工智能发展白皮书[EB/OL]. [2024.5.6]. https://example.com/report
+[6] ZHANG S Q, LI M, WANG H. Survey on large language models[J]. Journal of Software, 2025, 36(2): 1-20.
+[8] 教育部. 关于加强学术规范的意见. 北京: 教育部, 2023.

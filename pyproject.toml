@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gbt7714-lint"
+version = "0.1.0"
+description = "Linter and auto-fixer for bibliographies under GB/T 7714-2025, the Chinese national standard for bibliographic references (effective 2026-07-01)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "hc-ui" }]
+keywords = [
+    "gbt7714",
+    "gb/t 7714-2025",
+    "bibliography",
+    "citation",
+    "references",
+    "linter",
+    "academic-writing",
+    "thesis",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Chinese (Simplified)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/hc-ui/gbt7714-lint"
+Repository = "https://github.com/hc-ui/gbt7714-lint"
+Issues = "https://github.com/hc-ui/gbt7714-lint/issues"
+Changelog = "https://github.com/hc-ui/gbt7714-lint/blob/main/CHANGELOG.md"
+
+[project.scripts]
+gbt7714-lint = "gbt7714_lint.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
