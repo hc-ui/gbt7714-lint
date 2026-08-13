@@ -1,8 +1,6 @@
 # gbt7714-lint
 
 [![CI](https://github.com/hc-ui/gbt7714-lint/actions/workflows/ci.yml/badge.svg)](https://github.com/hc-ui/gbt7714-lint/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/gbt7714-lint)](https://pypi.org/project/gbt7714-lint/)
-[![Python](https://img.shields.io/pypi/pyversions/gbt7714-lint)](https://pypi.org/project/gbt7714-lint/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **参考文献格式检查与自动修复工具，面向 GB/T 7714—2025 新国标。**
@@ -30,10 +28,10 @@ GB/T 7714—2025 已于 2026 年 7 月 1 日实施，高校学位论文和期刊
 ## 安装
 
 ```bash
-pip install gbt7714-lint
+pip install git+https://github.com/hc-ui/gbt7714-lint.git
 ```
 
-无任何第三方依赖，Python 3.9+。
+无任何第三方依赖，Python 3.9+。（PyPI 包名 `gbt7714-lint` 上架中，上架后可直接 `pip install gbt7714-lint`。）
 
 ## 使用
 

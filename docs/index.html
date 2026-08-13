@@ -9,6 +9,7 @@
 <meta property="og:description" content="粘贴参考文献列表，一键找出不符合 2025 新国标的地方并自动修复。免安装，数据不出浏览器。">
 <meta property="og:url" content="https://hc-ui.github.io/gbt7714-lint/">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://raw.githubusercontent.com/hc-ui/gbt7714-lint/main/assets/demo-screenshot.png">
 <style>
   :root {
     --bg: #f5f6f8;
@@ -177,7 +178,7 @@
       <a href="https://github.com/hc-ui/gbt7714-lint#%E8%A7%84%E5%88%99%E4%B8%80%E8%A7%88" target="_blank" rel="noopener">支持的检查规则一览</a>
       <a href="https://github.com/hc-ui/gbt7714-lint/issues" target="_blank" rel="noopener">误报 / 漏报反馈</a>
     </div>
-    <div>命令行与 Python 库版本：<code class="inline">pip install gbt7714-lint</code>，与本页使用完全相同的检查引擎（基于 <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> 在浏览器内运行）。</div>
+    <div>命令行与 Python 库版本：<code class="inline">pip install git+https://github.com/hc-ui/gbt7714-lint.git</code>，与本页使用完全相同的检查引擎（基于 <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> 在浏览器内运行）。</div>
     <div>本工具基于对 GB/T 7714—2025 公开资料的理解整理，检查结果仅供参考，以标准原文和所在院校 / 期刊的要求为准。</div>
   </footer>
 </div>
@@ -336,7 +337,7 @@ $("btnCopy").onclick = async () => {
 
 boot().catch(e => {
   console.error(e);
-  setStatus("运行时加载失败（可能是网络问题），请刷新重试；或使用命令行版本：pip install gbt7714-lint", "error");
+  setStatus("运行时加载失败（可能是网络问题），请刷新重试；或使用命令行版本（见 GitHub 仓库安装说明）", "error");
 });
 </script>
 </body>
