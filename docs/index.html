@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GB/T 7714—2025 参考文献格式在线检查 | gbt7714-lint</title>
+<meta name="description" content="免费在线检查参考文献是否符合 GB/T 7714—2025 新国标：粘贴论文参考文献列表，逐条指出格式问题并一键自动修复。纯浏览器本地运行，内容不会上传。">
+<meta property="og:title" content="GB/T 7714—2025 参考文献格式在线检查">
+<meta property="og:description" content="粘贴参考文献列表，一键找出不符合 2025 新国标的地方并自动修复。免安装，数据不出浏览器。">
+<meta property="og:url" content="https://hc-ui.github.io/gbt7714-lint/">
+<meta property="og:type" content="website">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --ink: #1c2333;
+    --muted: #667085;
+    --line: #e4e7ec;
+    --accent: #1d4ed8;
+    --accent-soft: #eff4ff;
+    --error: #dc2626;
+    --error-soft: #fef2f2;
+    --warn: #b45309;
+    --warn-soft: #fffbeb;
+    --ok: #15803d;
+    --ok-soft: #f0fdf4;
+    --mono: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 56px; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; margin-bottom: 6px; }
+  h1 { font-size: 26px; margin: 0; letter-spacing: .3px; }
+  .gh-link { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .gh-link a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .gh-link a:hover { text-decoration: underline; }
+  .tagline { color: var(--muted); font-size: 15px; margin: 0 0 22px; }
+  .tagline b { color: var(--ink); font-weight: 600; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 960px) { .grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px 20px;
+    box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  .card h2 { font-size: 15px; margin: 0 0 12px; color: var(--muted); font-weight: 600; text-transform: none; }
+  textarea {
+    width: 100%;
+    min-height: 320px;
+    resize: vertical;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+    background: #fcfcfd;
+  }
+  textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  button {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    border-radius: 9px;
+    padding: 9px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover:not(:disabled) { background: #1e40af; color: #fff; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .status { margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .status.ready { color: var(--ok); }
+  .status.error { color: var(--error); }
+  .summary { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip {
+    font-size: 13px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .chip.err { background: var(--error-soft); color: var(--error); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); }
+  .issue {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+  }
+  .issue.error { border-left-color: var(--error); background: var(--error-soft); }
+  .issue .meta { font-weight: 700; margin-right: 6px; }
+  .issue .rule { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-right: 6px; }
+  .issue .fixtag { font-size: 12px; color: var(--ok); font-weight: 600; margin-left: 6px; white-space: nowrap; }
+  .issue .diff { margin-top: 4px; font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
+  .issue .diff .b { background: #fee2e2; text-decoration: line-through; padding: 0 3px; border-radius: 3px; }
+  .issue .diff .a { background: #dcfce7; padding: 0 3px; border-radius: 3px; }
+  .allgood {
+    padding: 24px;
+    text-align: center;
+    color: var(--ok);
+    background: var(--ok-soft);
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .placeholder { color: var(--muted); font-size: 14px; padding: 32px 8px; text-align: center; }
+  #fixedWrap { margin-top: 16px; display: none; }
+  #fixedWrap h3 { font-size: 14px; margin: 0 0 8px; color: var(--muted); }
+  #fixedOut { min-height: 180px; background: var(--ok-soft); }
+  footer { margin-top: 36px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  footer .links { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-bottom: 10px; }
+  code.inline { font-family: var(--mono); background: #eef1f5; padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>GB/T 7714—2025 参考文献格式检查</h1>
+    <div class="gh-link">
+      <a href="https://github.com/hc-ui/gbt7714-lint" target="_blank" rel="noopener">GitHub 源码</a>
+      <a href="https://github.com/hc-ui/gbt7714-lint" target="_blank" rel="noopener"><img src="https://img.shields.io/github/stars/hc-ui/gbt7714-lint?style=social" alt="GitHub stars" height="20"></a>
+    </div>
+  </header>
+  <p class="tagline">
+    粘贴论文参考文献列表，逐条找出不符合 <b>2026 年 7 月 1 日实施的新国标</b> 的格式问题，并一键自动修复。
+    <b>纯浏览器本地运行</b>，内容不会上传到任何服务器。
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>参考文献列表（每行一条，支持 [1] 编号）</h2>
+      <textarea id="input" spellcheck="false"></textarea>
+      <div class="btns">
+        <button id="btnLint" class="primary" disabled>检查格式</button>
+        <button id="btnFix" disabled>一键修复</button>
+        <button id="btnSample">载入示例</button>
+        <button id="btnClear">清空</button>
+      </div>
+      <div id="status" class="status">正在加载 Python 运行时（约 10 MB，首次打开需数十秒）…</div>
+    </div>
+
+    <div class="card">
+      <h2>检查结果</h2>
+      <div id="summary" class="summary"></div>
+      <div id="issues"><div class="placeholder">点击「检查格式」开始。检查在你的浏览器里完成，适合直接粘贴学位论文的参考文献表。</div></div>
+      <div id="fixedWrap">
+        <h3>修复结果（可直接粘贴回文档）</h3>
+        <textarea id="fixedOut" readonly spellcheck="false"></textarea>
+        <div class="btns">
+          <button id="btnCopy">复制修复结果</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="links">
+      <a href="https://github.com/hc-ui/gbt7714-lint#%E8%A7%84%E5%88%99%E4%B8%80%E8%A7%88" target="_blank" rel="noopener">支持的检查规则一览</a>
+      <a href="https://github.com/hc-ui/gbt7714-2025-cheatsheet" target="_blank" rel="noopener">GB/T 7714—2025 新旧国标对照速查表</a>
+      <a href="https://github.com/hc-ui/gbt7714-lint/issues" target="_blank" rel="noopener">误报 / 漏报反馈</a>
+    </div>
+    <div>命令行与 Python 库版本：<code class="inline">pip install gbt7714-lint</code>，与本页使用完全相同的检查引擎（基于 <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> 在浏览器内运行）。</div>
+    <div>本工具基于对 GB/T 7714—2025 公开资料的理解整理，检查结果仅供参考，以标准原文和所在院校 / 期刊的要求为准。</div>
+  </footer>
+</div>
+
+<script>
+const SAMPLE = `[1] EINSTEIN A. Relativity: the special and the general theory[M]. New York: Crown, 1961.
+[2] 张三，李四，王五，赵六. 深度学习在图像识别中的应用研究[J]. 计算机学报，2020, 43(3): 45-58。
+[3] 皮亚杰. 结构主义[M]. 倪连生, 王琳, 等译. 北京: 商务印书馆, 1984.
+[4] 李强. 数据库系统概论[M]. 北京: 高等教育出版社, 2019[2024-05-06].
+[5] 王芳. 人工智能发展白皮书[EB/OL]. [2024.5.6]. https://example.com/report
+[6] ZHANG S Q, LI M, WANG H. Survey on large language models[J]. Journal of Software, 2025, 36(2): 1-20.
+[8] 教育部. 关于加强学术规范的意见. 北京: 教育部, 2023.`;
+
+const $ = id => document.getElementById(id);
+const statusEl = $("status"), issuesEl = $("issues"), summaryEl = $("summary");
+let pyLint = null, pyFix = null;
+
+$("input").value = SAMPLE;
+$("btnSample").onclick = () => { $("input").value = SAMPLE; };
+$("btnClear").onclick = () => { $("input").value = ""; resetResults(); };
+
+function setStatus(text, cls) { statusEl.textContent = text; statusEl.className = "status" + (cls ? " " + cls : ""); }
+function esc(s) { return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function resetResults() {
+  summaryEl.innerHTML = "";
+  issuesEl.innerHTML = '<div class="placeholder">点击「检查格式」开始。</div>';
+  $("fixedWrap").style.display = "none";
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("加载失败: " + src));
+    document.head.appendChild(s);
+  });
+}
+
+async function boot() {
+  const PYODIDE_VERSION = "v0.26.4";
+  const cdns = [
+    `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`,
+    `https://fastly.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`,
+  ];
+  let py = null, lastErr = null;
+  for (const base of cdns) {
+    try {
+      if (typeof loadPyodide === "undefined") await loadScript(base + "pyodide.js");
+      py = await loadPyodide({ indexURL: base });
+      break;
+    } catch (e) { lastErr = e; }
+  }
+  if (!py) throw lastErr || new Error("Pyodide 加载失败");
+
+  setStatus("正在加载检查引擎…");
+  const manifest = await (await fetch("pkg/manifest.json")).json();
+  py.FS.mkdirTree("/home/pyodide/gbt7714_lint");
+  await Promise.all(manifest.files.map(async f => {
+    const code = await (await fetch("pkg/gbt7714_lint/" + f)).text();
+    py.FS.writeFile("/home/pyodide/gbt7714_lint/" + f, code);
+  }));
+
+  py.runPython(`
+import json
+from gbt7714_lint import lint_text, fix_text, __version__
+
+def _result_dict(r):
+    return {
+        "entries": len(r.entries),
+        "errors": r.error_count,
+        "warnings": r.warning_count,
+        "fixable": r.fixable_count,
+        "issues": [i.to_dict() for i in r.issues],
+    }
+
+def lint_json(text):
+    return json.dumps(_result_dict(lint_text(text)), ensure_ascii=False)
+
+def fix_json(text):
+    fixed, remaining = fix_text(text)
+    d = _result_dict(remaining)
+    d["fixed"] = fixed
+    return json.dumps(d, ensure_ascii=False)
+`);
+  pyLint = py.globals.get("lint_json");
+  pyFix = py.globals.get("fix_json");
+  const version = py.runPython("__version__");
+  $("btnLint").disabled = false;
+  $("btnFix").disabled = false;
+  setStatus(`就绪（引擎 gbt7714-lint v${version}，运行在你的浏览器里）`, "ready");
+}
+
+function renderIssues(data, container) {
+  if (!data.issues.length) {
+    container.innerHTML = '<div class="allgood">未发现问题，参考文献格式符合已实现的检查规则。</div>';
+    return;
+  }
+  container.innerHTML = data.issues.map(i => {
+    const sev = i.severity === "error" ? "error" : "warning";
+    const sevText = i.severity === "error" ? "错误" : "警告";
+    let diff = "";
+    if (i.before !== undefined && i.after !== undefined) {
+      diff = `<div class="diff"><span class="b">${esc(i.before)}</span> → <span class="a">${esc(i.after) || "（删除）"}</span></div>`;
+    }
+    return `<div class="issue ${sev}">
+      <span class="meta">[${esc(i.entry)}]</span><span class="rule">${esc(i.rule)}</span>${sevText}：${esc(i.message)}${i.fixable ? '<span class="fixtag">可自动修复</span>' : ""}${diff}
+    </div>`;
+  }).join("");
+}
+
+function renderSummary(data) {
+  summaryEl.innerHTML =
+    `<span class="chip">共 ${data.entries} 条</span>` +
+    `<span class="chip ${data.errors ? "err" : "ok"}">${data.errors} 个错误</span>` +
+    `<span class="chip ${data.warnings ? "warn" : "ok"}">${data.warnings} 个警告</span>` +
+    (data.fixable ? `<span class="chip ok">${data.fixable} 处可自动修复</span>` : "");
+}
+
+$("btnLint").onclick = () => {
+  const text = $("input").value;
+  if (!text.trim()) { resetResults(); return; }
+  const data = JSON.parse(pyLint(text));
+  $("fixedWrap").style.display = "none";
+  renderSummary(data);
+  renderIssues(data, issuesEl);
+};
+
+$("btnFix").onclick = () => {
+  const text = $("input").value;
+  if (!text.trim()) { resetResults(); return; }
+  const data = JSON.parse(pyFix(text));
+  renderSummary(data);
+  if (data.issues.length) {
+    issuesEl.innerHTML = '<div class="placeholder" style="padding:8px 0 12px;text-align:left">以下问题无法自动修复，需人工核对：</div>';
+    const div = document.createElement("div");
+    renderIssues(data, div);
+    issuesEl.appendChild(div);
+  } else {
+    issuesEl.innerHTML = '<div class="allgood">全部可修复问题已处理完毕。</div>';
+  }
+  $("fixedOut").value = data.fixed;
+  $("fixedWrap").style.display = "block";
+};
+
+$("btnCopy").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText($("fixedOut").value);
+    $("btnCopy").textContent = "已复制";
+    setTimeout(() => { $("btnCopy").textContent = "复制修复结果"; }, 1500);
+  } catch {
+    $("fixedOut").select();
+    document.execCommand("copy");
+  }
+};
+
+boot().catch(e => {
+  console.error(e);
+  setStatus("运行时加载失败（可能是网络问题），请刷新重试；或使用命令行版本：pip install gbt7714-lint", "error");
+});
+</script>
+</body>
+</html>

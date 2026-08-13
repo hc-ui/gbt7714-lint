@@ -1,0 +1,42 @@
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "src/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build site (demo page + package sources for Pyodide)
+        run: |
+          mkdir -p _site/pkg/gbt7714_lint
+          cp -r docs/. _site/
+          cp src/gbt7714_lint/*.py _site/pkg/gbt7714_lint/
+          python -c "
+          import json, os
+          files = sorted(f for f in os.listdir('src/gbt7714_lint') if f.endswith('.py'))
+          with open('_site/pkg/manifest.json', 'w') as fh:
+              json.dump({'files': files}, fh)
+          "
+      - uses: actions/upload-pages-artifact@v3
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -7,7 +7,9 @@
 
 **参考文献格式检查与自动修复工具，面向 GB/T 7714—2025 新国标。**
 
-A linter and auto-fixer for plain-text bibliographies under **GB/T 7714—2025**, the new Chinese national standard for bibliographic references that took effect on **July 1, 2026**, replacing GB/T 7714—2015. Paste the reference list from your thesis, get a rule-by-rule report, and let `--fix` migrate the mechanical parts automatically. Zero dependencies, works offline.
+**[在线试用（免安装）→ hc-ui.github.io/gbt7714-lint](https://hc-ui.github.io/gbt7714-lint/)** — 粘贴即查，纯浏览器本地运行，数据不上传。
+
+A linter and auto-fixer for plain-text bibliographies under **GB/T 7714—2025**, the new Chinese national standard for bibliographic references that took effect on **July 1, 2026**, replacing GB/T 7714—2015. Paste the reference list from your thesis, get a rule-by-rule report, and let `--fix` migrate the mechanical parts automatically. Zero dependencies, works offline. [Try it in your browser](https://hc-ui.github.io/gbt7714-lint/) — no install needed.
 
 ## 为什么需要它
 
