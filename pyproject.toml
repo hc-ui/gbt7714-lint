@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gbt7714-lint"
-version = "0.2.0"
+version = "0.3.0"
 description = "Linter and auto-fixer for bibliographies under GB/T 7714-2025, the Chinese national standard for bibliographic references (effective 2026-07-01)"
 readme = "README.md"
 requires-python = ">=3.9"

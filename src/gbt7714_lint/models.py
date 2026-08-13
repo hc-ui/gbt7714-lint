@@ -8,10 +8,14 @@ from typing import Optional
 
 @dataclass
 class Entry:
-    """One bibliography entry.
+    """One item parsed out of the pasted text.
 
     ``body`` is the entry text without the leading ``[1]``-style label; all
     rules operate on it. ``raw`` keeps the original text for display.
+    ``kind`` is ``"entry"`` for references and ``"heading"`` for section
+    titles such as "参考文献", which are echoed back unchanged and never
+    linted. ``leading_blanks`` records blank lines before the item so that
+    ``--fix`` can preserve the layout of the list.
     """
 
     raw: str
@@ -19,6 +23,8 @@ class Entry:
     line_no: int
     label: Optional[str] = None
     number: Optional[int] = None
+    kind: str = "entry"
+    leading_blanks: int = 0
 
     @property
     def display_label(self) -> str:
