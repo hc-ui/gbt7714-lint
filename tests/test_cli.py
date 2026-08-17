@@ -91,6 +91,13 @@ def test_cli_requires_input_or_clip():
         main([])
 
 
+def test_cli_empty_clipboard(monkeypatch, capsys):
+    monkeypatch.setattr("gbt7714_lint.cli._read_clipboard", lambda: "  \n")
+    assert main(["--clip"]) == 2
+    err = capsys.readouterr().err
+    assert "空" in err
+
+
 def test_cli_fix_writes_output(tmp_path, capsys):
     src = tmp_path / "refs.txt"
     src.write_text(SAMPLE, encoding="utf-8")

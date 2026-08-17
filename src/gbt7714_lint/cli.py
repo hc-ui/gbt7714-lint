@@ -174,6 +174,10 @@ def main(argv: list[str] | None = None) -> int:
     else:
         parser.error("请提供参考文献文件，或使用 --clip / -")
 
+    if not text.strip():
+        print("没有可检查的文本（文件或剪贴板是空的）。", file=sys.stderr)
+        return 2
+
     config = Config(punct=args.punct)
 
     if args.fix:
