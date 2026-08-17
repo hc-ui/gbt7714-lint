@@ -3,13 +3,15 @@
 [![CI](https://github.com/hc-ui/gbt7714-lint/actions/workflows/ci.yml/badge.svg)](https://github.com/hc-ui/gbt7714-lint/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**参考文献格式检查与自动修复工具，面向 GB/T 7714—2025 新国标。**
+Word 里抄出来的参考文献，对照 **GB/T 7714—2025** 逐条检查，能修的一键修。
 
-**[在线试用（免安装）→ hc-ui.github.io/gbt7714-lint](https://hc-ui.github.io/gbt7714-lint/)** — 粘贴即查，纯浏览器本地运行，数据不上传。
+**不是** BibTeX 宏包，也不是 Zotero 插件。你从 Word / WPS 粘出来的那段纯文本，就能用。
 
-A linter and auto-fixer for plain-text bibliographies under **GB/T 7714—2025**, the new Chinese national standard for bibliographic references that took effect on **July 1, 2026**, replacing GB/T 7714—2015. Paste the reference list from your thesis, get a rule-by-rule report, and let `--fix` migrate the mechanical parts automatically. Zero dependencies, works offline. [Try it in your browser](https://hc-ui.github.io/gbt7714-lint/) — no install needed.
+**[打开浏览器试用 →](https://hc-ui.github.io/gbt7714-lint/)**　免安装，数据不出本机。国标已于 **2026-07-01** 实施。
 
-![在线 Demo：逐条指出格式问题并给出修复对照](assets/demo-screenshot.png)
+![在线 Demo：左边粘参考文献，右边逐条标出 2025 版问题和修复对照](assets/demo-screenshot.png)
+
+English: a zero-dependency linter/auto-fixer for **plain-text** GB/T 7714—2025 bibliographies. [Try it in the browser](https://hc-ui.github.io/gbt7714-lint/).
 
 ## 为什么需要它
 
@@ -31,7 +33,7 @@ GB/T 7714—2025 已于 2026 年 7 月 1 日实施，高校学位论文和期刊
 pip install git+https://github.com/hc-ui/gbt7714-lint.git
 ```
 
-无任何第三方依赖，Python 3.9+。（PyPI 包名 `gbt7714-lint` 上架中，上架后可直接 `pip install gbt7714-lint`。）
+无第三方依赖，Python 3.9+。尚未上 PyPI，请从 Git 安装。同系列还有正文序号检查：[zh-cite-check](https://github.com/hc-ui/zh-cite-check)。
 
 ## 使用
 
