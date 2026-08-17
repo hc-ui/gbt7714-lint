@@ -130,6 +130,14 @@ fixed, remaining = fix_text(text)
 - 拼音姓氏识别基于常见姓氏罗马化对照表，机构缩写基于常见国际组织列表；存在歧义时宁可不修。
 - 解析器面向常见著录形态做了启发式设计；遇到误报/漏报，欢迎[提 issue](https://github.com/hc-ui/gbt7714-lint/issues) 并附上出问题的条目。
 
+## 姊妹项目
+
+- [zh-cite-check](https://github.com/hc-ui/zh-cite-check) — 正文引用序号与参考文献表是否一一对应
+- [docx-reply](https://github.com/hc-ui/docx-reply) — Word 批注与修订导出成修改对照表
+- [zotlocal](https://github.com/hc-ui/zotlocal) — 读本机 Zotero，不用 Web API key
+- [kebiao2ics](https://github.com/hc-ui/kebiao2ics) — 大学课表转手机日历 .ics
+- [luanma](https://github.com/hc-ui/luanma) — 解压后文件名乱码自动修复
+
 ## 贡献
 
 欢迎 issue 与 PR。跑测试：
