@@ -4,6 +4,6 @@ from .config import Config
 from .linter import fix_text, lint_text
 from .models import Entry, Issue
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = ["lint_text", "fix_text", "Config", "Entry", "Issue", "__version__"]

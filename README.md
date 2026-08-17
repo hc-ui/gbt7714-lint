@@ -41,6 +41,9 @@ pip install git+https://github.com/hc-ui/gbt7714-lint.git
 # 检查（从 Word 复制参考文献，存成 refs.txt）
 gbt7714-lint refs.txt
 
+# 从剪贴板检查（Word 里复制后）
+gbt7714-lint --clip
+
 # 自动修复，结果写入新文件
 gbt7714-lint refs.txt --fix -o refs_fixed.txt
 

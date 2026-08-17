@@ -76,6 +76,21 @@ def test_cli_json_output(tmp_path, capsys):
     assert payload["warnings"] > 0
 
 
+def test_cli_clip_reads_clipboard(monkeypatch, capsys):
+    monkeypatch.setattr(
+        "gbt7714_lint.cli._read_clipboard",
+        lambda: "[1] 张三. 标题. 学报, 2020.\n",
+    )
+    assert main(["--clip"]) == 1
+    out = capsys.readouterr().out
+    assert "E001" in out
+
+
+def test_cli_requires_input_or_clip():
+    with pytest.raises(SystemExit):
+        main([])
+
+
 def test_cli_fix_writes_output(tmp_path, capsys):
     src = tmp_path / "refs.txt"
     src.write_text(SAMPLE, encoding="utf-8")

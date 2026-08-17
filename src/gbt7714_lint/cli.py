@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 
@@ -23,6 +24,34 @@ def _decode(data: bytes) -> str:
         except UnicodeDecodeError:
             continue
     return data.decode("utf-8", errors="replace")
+
+
+def _read_clipboard() -> str:
+    """Read the system clipboard. Windows uses PowerShell; macOS uses pbpaste."""
+    if sys.platform == "win32":
+        completed = subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "Get-Clipboard -Raw",
+            ],
+            capture_output=True,
+            check=False,
+        )
+        if completed.returncode != 0:
+            err = _decode(completed.stderr).strip() or "Get-Clipboard failed"
+            raise OSError(err)
+        return _decode(completed.stdout)
+    for command in (["pbpaste"], ["xclip", "-selection", "clipboard", "-o"]):
+        try:
+            completed = subprocess.run(command, capture_output=True, check=False)
+        except OSError:
+            continue
+        if completed.returncode == 0:
+            return _decode(completed.stdout)
+    raise OSError("clipboard is not available on this system")
 
 
 def _read_input(path_arg: str) -> tuple[str, str]:
@@ -88,13 +117,23 @@ def main(argv: list[str] | None = None) -> int:
         epilog=(
             "示例：\n"
             "  gbt7714-lint refs.txt\n"
+            "  gbt7714-lint --clip\n"
             "  gbt7714-lint refs.txt --fix -o refs_fixed.txt\n"
             "  gbt7714-lint refs.txt --ignore W104,W108\n"
             f"可用规则：{'、'.join(ALL_RULE_IDS)}"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("input", help="参考文献文本文件路径，使用 - 从标准输入读取")
+    parser.add_argument(
+        "input",
+        nargs="?",
+        help="参考文献文本文件路径，使用 - 从标准输入读取",
+    )
+    parser.add_argument(
+        "--clip",
+        action="store_true",
+        help="从系统剪贴板读取（适合从 Word 复制后直接检查）",
+    )
     parser.add_argument("--fix", action="store_true", help="自动修复可修复的问题")
     parser.add_argument(
         "-o", "--output", help="修复结果输出到该文件（UTF-8 编码，默认打印到标准输出）"
@@ -120,11 +159,20 @@ def main(argv: list[str] | None = None) -> int:
     except argparse.ArgumentTypeError as exc:
         parser.error(str(exc))
 
-    try:
-        text, source_name = _read_input(args.input)
-    except OSError as exc:
-        print(f"无法读取输入：{exc}", file=sys.stderr)
-        return 2
+    if args.clip:
+        try:
+            text, source_name = _read_clipboard(), "<clipboard>"
+        except OSError as exc:
+            print(f"无法读取剪贴板：{exc}", file=sys.stderr)
+            return 2
+    elif args.input:
+        try:
+            text, source_name = _read_input(args.input)
+        except OSError as exc:
+            print(f"无法读取输入：{exc}", file=sys.stderr)
+            return 2
+    else:
+        parser.error("请提供参考文献文件，或使用 --clip / -")
 
     config = Config(punct=args.punct)
 
